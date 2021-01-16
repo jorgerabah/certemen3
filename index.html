@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trabajo Jorge</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div style="float: right;padding-bottom: 15px;">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+            Crear Cliente 
+        </button>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Rut</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Correo Electronico</th>
+                <th scope="col">Telefono</th>
+                <th scope="col">Direccion </th>
+                <th scope="col">Estado Civil </th>
+                <th scope="col">Fecha Nacimiento </th>
+                <th scope="col">Contraseña</th>
+            </tr>
+        </thead>
+        <tbody id="clientesbase">
+
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Crear Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="rut">Rut</label>
+                            <input type="text" class="form-control" id="rut" placeholder="Ingresar Rut">
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" placeholder="Ingresar Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label for="correo">Correo Electronico</label>
+                            <input type="email" class="form-control" id="correo" aria-describedby="emailHelp" placeholder="Ingresar Correo">
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Telefono</label>
+                            <input type="tel" class="form-control" id="telefono" placeholder="Ingresar Telefono" maxlength="9">
+                        </div>
+                        <div class="form-group">
+                            <label for="direccion">Direccion</label>
+                            <input type="text" class="form-control" id="direccion" placeholder="Ingresar Direccion">
+                        </div>
+                        <div class="form-group">
+                            <label for="estadocivil">Estado Civil</label>
+                            <select class="form-control" id="estadocivil">
+                              <option value="Casado">Casado</option>
+                              <option value="Separado">Separado</option>
+                              <option value="Soltero">Soltero</option>
+                              <option value="Viudo">Viudo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fechanacimiento">Fecha Nacimiento</label>
+                            <input type="date" class="form-control" id="fechanacimiento">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Contraseña</label>
+                            <input type="password" class="form-control" id="password" placeholder="Ingresar Contraseña">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarcliente()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/validarut.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            clientes();
+            $('#rut').Rut({
+                on_error: function() {
+                    alert('Rut Incorrecto');
+                },
+                format_on: 'keyup'
+            });
+        });
+
+        function clientes() {
+            $.ajax({
+                url: 'http://localhost:64618/api/clientes',
+                type: 'GET',
+                dataType: 'json',
+                success: function(result, status, xhr) {
+                    let html = '';
+                    for (let item of result.data) {
+                        html += '<tr>';
+                        html += '<td>' + item.rut + '</td>';
+                        html += '<td>' + item.nombre + '</td>';
+                        html += '<td>' + item.mail + '</td>';
+                        html += '<td>' + item.celular + '</td>';
+                        html += '<td>' + item.direccion + '</td>';
+                        html += '<td>' + item.estado + '</td>';
+                        html += '<td>' + item.fecha_nac + '</td>';
+                        html += '<td>' + item.clave + '</td>';
+                        html += '</tr>';
+                    }
+
+                    $('#clientesbase').html(html);
+                },
+                error: function(xhr, status) {
+                    console.log('fallo la solicitud');
+                }
+            })
+        }
+
+        function guardarcliente() {
+            let rut = $('#rut').val();
+            let nombre = $('#nombre').val();
+            let correo = $('#correo').val();
+            let telefono = $('#telefono').val();
+            let direccion = $('#direccion').val();
+            let estadocivil = $('#estadocivil').val();
+            let fechanacimiento = $('#fechanacimiento').val();
+            let password = $('#password').val();
+
+            $.ajax({
+                url: 'http://localhost:64618/api/cliente',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    rut: rut,
+                    nombre: nombre,
+                    mail: correo,
+                    celular: telefono,
+                    direccion: direccion,
+                    estado: estadocivil,
+                    fecha_nac: fechanacimiento,
+                    clave: password
+                },
+                success: function(result, status, xhr) {
+                    if (result.error == false) {
+                        alert('Cliente Ingresado');
+                        clientes();
+                    }
+                },
+                error: function(xhr, status) {
+                    console.log('fallo la solicitud');
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>
